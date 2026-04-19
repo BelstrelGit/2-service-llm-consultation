@@ -1,5 +1,6 @@
 """Integration test for OpenRouter client using respx."""
 
+import httpx
 import pytest
 import respx
 from httpx import Response
@@ -36,4 +37,15 @@ async def test_call_openrouter_error():
     )
 
     with pytest.raises(RuntimeError, match="500"):
+        await call_openrouter("test prompt")
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_call_openrouter_network_error():
+    respx.post("https://openrouter.ai/api/v1/chat/completions").mock(
+        side_effect=httpx.ConnectError("Connection refused")
+    )
+
+    with pytest.raises(RuntimeError, match="request failed"):
         await call_openrouter("test prompt")
