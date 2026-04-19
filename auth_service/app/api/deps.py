@@ -30,7 +30,7 @@ async def get_auth_uc(
     return AuthUseCase(users_repo)
 
 
-async def get_current_user_id(
+async def get_current_user(
     token: Annotated[str, Depends(oauth2_scheme)],
 ) -> int:
     try:
