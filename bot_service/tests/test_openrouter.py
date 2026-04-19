@@ -21,12 +21,19 @@ async def test_call_openrouter_success():
         ]
     }
 
-    respx.post("https://openrouter.ai/api/v1/chat/completions").mock(
+    route = respx.post("https://openrouter.ai/api/v1/chat/completions").mock(
         return_value=Response(200, json=mock_response)
     )
 
     result = await call_openrouter("Расскажи про Толстого")
     assert result == "Лев Толстой — великий русский писатель."
+    assert route.called
+    assert route.call_count == 1
+    request_payload = route.calls[0].request.read()
+    import json
+    body = json.loads(request_payload)
+    assert body["messages"][0]["content"] == "Расскажи про Толстого"
+    assert "model" in body
 
 
 @pytest.mark.asyncio
