@@ -59,7 +59,9 @@ async def test_token_command_invalid_jwt(fake_redis):
 
 
 @pytest.mark.asyncio
-async def test_text_without_token_denied():
+async def test_text_without_token_denied(mocker):
+    mock_task = mocker.patch("app.bot.handlers.llm_request")
+
     from app.bot.handlers import handle_text
 
     message = _make_message("Привет, расскажи про Python", user_id=111)
@@ -67,6 +69,7 @@ async def test_text_without_token_denied():
 
     message.answer.assert_called_once()
     assert "нет токена" in message.answer.call_args[0][0].lower()
+    mock_task.delay.assert_not_called()
 
 
 @pytest.mark.asyncio
